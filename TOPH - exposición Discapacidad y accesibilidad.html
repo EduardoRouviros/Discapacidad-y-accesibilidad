@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOPH — Navegación Universitaria Asistida | Sinergia Digital</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tophDark: '#081815',
+            tophGold: '#D4AF37',
+            tophGoldLight: '#fefce8',
+            tophGray: '#A0B0AB',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #081815;
+      color: #1e293b;
+      overflow: hidden;
+      user-select: none;
+    }
+    
+    .slide-pane {
+      display: none !important;
+    }
+    
+    .slide-pane.active {
+      display: flex !important;
+    }
+
+    /* WCAG Focus Visible Customization */
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #D4AF37 !important;
+      outline-offset: 2px !important;
+    }
+
+    /* Font size scaling classes */
+    .font-scale-sm { font-size: 0.85rem; }
+    .font-scale-base { font-size: 1rem; }
+    .font-scale-lg { font-size: 1.12rem; }
+    .font-scale-xl { font-size: 1.25rem; }
+
+    /* Vibration simulation animations */
+    @keyframes phoneVibrateLeft {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-4px, 0) rotate(-1deg); }
+      40% { transform: translate(4px, 0) rotate(1deg); }
+      60% { transform: translate(-4px, 0) rotate(-1deg); }
+      80% { transform: translate(4px, 0) rotate(1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    @keyframes phoneVibrateRight {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); border-color: #D4AF37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes phoneVibrateCenter {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(0, -6px); }
+      50% { transform: translate(0, 6px); }
+      75% { transform: translate(0, -4px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .vibrate-left { animation: phoneVibrateLeft 0.3s ease-in-out infinite; }
+    .vibrate-right { animation: phoneVibrateRight 0.6s ease-in-out infinite; }
+    .vibrate-center { animation: phoneVibrateCenter 0.25s ease-in-out infinite; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #081815;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D4AF37;
+      border-radius: 3px;
+    }
+
+    .high-contrast {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+    .high-contrast * {
+      border-color: #ffffff !important;
+    }
+  </style>
+</head>
+<body class="bg-tophDark text-slate-800 h-screen w-screen flex flex-col justify-between" role="application" aria-label="Aplicación de Presentación TOPH">
+
+  <!-- HEADER NAVBAR -->
+  <header class="bg-tophDark border-b border-emerald-900/60 px-4 lg:px-6 py-2.5 flex items-center justify-between z-30 shadow-md" role="banner">
+    <div class="flex items-center space-x-3">
+      <button id="sidebarToggle" class="text-tophGold hover:text-white transition p-2 rounded-lg bg-emerald-950/50 border border-emerald-900/50 focus:outline-none" aria-label="Abrir índice de diapositivas" title="Índice de Diapositivas (Alt+I)">
+        <i class="fa-solid fa-bars text-base" aria-hidden="true"></i>
+      </button>
+      <div>
+        <h1 class="font-display text-white font-bold text-sm lg:text-base tracking-wide">TOPH <span class="text-tophGold font-normal text-xs">| Navegación Universitaria Asistida</span></h1>
+        <p class="text-[11px] text-tophGray">Sinergia Digital • 15 Diapositivas • WCAG 2.2 AA</p>
+      </div>
+    </div>
+
+    <!-- Advanced Accessibility & Control Toolbar -->
+    <div class="flex items-center space-x-2 lg:space-x-3" role="toolbar" aria-label="Herramientas de accesibilidad y control">
+      <!-- Screen Reader Audio Player Widget -->
+      <div class="hidden md:flex items-center space-x-1.5 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-xl">
+        <span class="text-[11px] text-tophGold font-semibold mr-1"><i class="fa-solid fa-headphones" aria-hidden="true"></i> Lector:</span>
+        <button id="readerPlayBtn" onclick="toggleScreenReader()" class="text-slate-300 hover:text-tophGold px-1.5 py-1 rounded transition text-xs font-medium" aria-label="Leer diapositiva actual con voz" title="Leer diapositiva actual (Tecla S)">
+          <i id="readerIcon" class="fa-solid fa-play" aria-hidden="true"></i> <span id="readerText">Leer</span>
+        </button>
+        <button onclick="pauseScreenReader()" class="text-slate-300 hover:text-tophGold px-1 py-1 rounded transition text-xs" aria-label="Pausar o reanudar lector de voz" title="Pausar / Reanudar">
+          <i class="fa-solid fa-pause" aria-hidden="true"></i>
+        </button>
+        <button onclick="stopScreenReader()" class="text-slate-300 hover:text-tophGold px-1 py-1 rounded transition text-xs" aria-label="Detener lector de voz" title="Detener">
+          <i class="fa-solid fa-stop" aria-hidden="true"></i>
+        </button>
+        <select id="speechRateSelect" onchange="changeSpeechRate(this.value)" class="bg-tophDark text-tophGold border border-emerald-800 text-[11px] rounded px-1 py-0.5 outline-none" aria-label="Velocidad de síntesis de voz" title="Velocidad de voz">
+          <option value="0.8">0.8x</option>
+          <option value="1.0" selected>1.0x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+        </select>
+      </div>
+
+      <!-- Font Resizer Buttons -->
+      <div class="hidden sm:flex items-center space-x-1 bg-emerald-950/80 border border-emerald-800/60 p-1 rounded-xl">
+        <button onclick="adjustFontSize(-1)" class="text-slate-300 hover:text-tophGold px-2 py-0.5 rounded text-xs font-bold transition" aria-label="Reducir tamaño de fuente" title="Reducir fuente (A-)">A-</button>
+        <button onclick="resetFontSize()" class="text-slate-300 hover:text-tophGold px-1 py-0.5 rounded text-xs transition" aria-label="Restaurar tamaño de fuente original" title="Restaurar tamaño">A</button>
+        <button onclick="adjustFontSize(1)" class="text-slate-300 hover:text-tophGold px-2 py-0.5 rounded text-xs font-bold transition" aria-label="Aumentar tamaño de fuente" title="Aumentar fuente (A+)">A+</button>
+      </div>
+
+      <div class="bg-emerald-950/80 border border-emerald-900 text-tophGold px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase" aria-live="polite">
+        <span id="slideIndicator">1 / 15</span>
+      </div>
+      
+      <div class="flex items-center space-x-1.5">
+        <button id="contrastBtn" class="text-slate-300 hover:text-tophGold p-2 rounded-lg bg-emerald-950/50 border border-emerald-900/50 transition text-xs" aria-label="Activar modo de alto contraste" title="Modo Alto Contraste (Tecla C)">
+          <i class="fa-solid fa-universal-access" aria-hidden="true"></i>
+        </button>
+        <button id="fullscreenBtn" class="text-slate-300 hover:text-tophGold p-2 rounded-lg bg-emerald-950/50 border border-emerald-900/50 transition text-xs" aria-label="Alternar modo de pantalla completa" title="Pantalla Completa (Tecla F)">
+          <i class="fa-solid fa-expand" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR NAVIGATION INDEX -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-80 bg-tophDark border-r border-emerald-900 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl" aria-label="Índice de Diapositivas">
+    <div class="p-4 border-b border-emerald-900 flex items-center justify-between bg-emerald-950/40">
+      <div>
+        <h3 class="font-display font-bold text-white text-sm">Índice General (15 Diapositivas)</h3>
+        <p class="text-[11px] text-tophGold">Navegación accesible WCAG 2.2 AA</p>
+      </div>
+      <button id="sidebarClose" class="text-slate-400 hover:text-white p-2" aria-label="Cerrar índice">
+        <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div id="slideList" class="overflow-y-auto flex-1 p-3 space-y-1.5" role="navigation" aria-label="Lista de diapositivas">
+      <!-- Generated dynamically by JS -->
+    </div>
+    <div class="p-3 border-t border-emerald-900 text-[11px] text-tophGray text-center bg-emerald-950/30">
+      Sinergia Digital © 2026 • TOPH
+    </div>
+  </aside>
+
+  <!-- MAIN PRESENTATION CANVAS -->
+  <main class="flex-1 flex items-center justify-center p-3 lg:p-6 overflow-hidden relative" role="main">
+    <div id="slideContainer" class="w-full max-w-6xl h-full max-h-[640px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-emerald-900/25 relative font-scale-base">
+
+      <!-- SLIDE 1: Portada -->
+      <div class="slide-pane active flex-1 flex flex-col justify-between p-8 lg:p-10 bg-gradient-to-br from-[#081815] to-[#0f2822] text-white relative overflow-hidden" role="region" aria-label="Diapositiva 1: Portada Institucional">
+        <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-12" aria-hidden="true">
+          <i class="fa-solid fa-map-location-dot text-[260px] text-tophGold"></i>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="bg-tophGold text-tophDark font-bold text-xs px-3 py-1 rounded uppercase tracking-wider">Sinergia Digital</span>
+          <span class="text-tophGray text-xs font-medium">Investigación en Accesibilidad Tecnológica</span>
+        </div>
+        <div class="my-auto max-w-3xl">
+          <h1 class="font-display text-2xl lg:text-4xl font-extrabold text-white mb-3 leading-tight">
+            TOPH: App Móvil de Navegación Universitaria Asistida
+          </h1>
+          <p class="text-base lg:text-lg text-tophGold font-semibold mb-5">
+            Navegación accesible mediante respuesta háptica, guiado por voz y visión artificial en campus
+          </p>
+          <div class="flex flex-wrap gap-4 pt-3 border-t border-white/15 text-xs text-tophGray">
+            <div><strong class="text-white">Plataforma:</strong> Android Nativo (Jetpack Compose)</div>
+            <div><strong class="text-white">Dispositivo:</strong> Xiaomi Redmi Note 11</div>
+            <div><strong class="text-white">Estándar:</strong> WCAG 2.2 AA Compliant</div>
+          </div>
+        </div>
+        <div class="text-[11px] text-tophGray">
+          Usa las flechas del teclado (← / →), el lector de voz superior o los botones inferiores para navegar.
+        </div>
+      </div>
+
+      <!-- SLIDE 2: Problemática -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 2: Problemática de la navegación universitaria">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Contexto y Diagnóstico</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Problemática de la Navegación Universitaria</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-auto">
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophDark shadow-sm">
+            <div class="text-tophGold mb-2 text-xl" aria-hidden="true"><i class="fa-solid fa-building-columns"></i></div>
+            <h3 class="font-display font-bold text-tophDark text-sm mb-1">Identificación de Espacios</h3>
+            <p class="text-xs text-slate-600">Dificultad para reconocer facultades, pabellones y servicios universitarios de forma autónoma.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophDark shadow-sm">
+            <div class="text-tophGold mb-2 text-xl" aria-hidden="true"><i class="fa-solid fa-route"></i></div>
+            <h3 class="font-display font-bold text-tophDark text-sm mb-1">Rutas Accesibles</h3>
+            <p class="text-xs text-slate-600">Carencia de guías confiables para planificar trayectos seguros hacia destinos específicos en el campus.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophDark shadow-sm">
+            <div class="text-tophGold mb-2 text-xl" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 class="font-display font-bold text-tophDark text-sm mb-1">Obstáculos en Pasillos</h3>
+            <p class="text-xs text-slate-600">Presencia de elementos imprevistos en zonas de circulación y espacios comunes del campus.</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-xs text-amber-900">
+          <b>Necesidad clave:</b> Desarrollar una solución móvil que combine orientación espacial estructurada y alertas accesibles sin saturar los canales sensoriales del usuario.
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Objetivo y Propuesta de Solución -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 3: Objetivo y propuesta de solución">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Propuesta de Investigación</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Objetivo y Flujo de Solución</h2>
+        </div>
+        <div class="my-auto space-y-5">
+          <p class="text-sm text-slate-700 leading-relaxed">
+            <b>Objetivo General:</b> Diseñar y desarrollar una aplicación móvil de navegación universitaria asistida que facilite la orientación autónoma de personas con discapacidad visual mediante voz, háptica y visión artificial.
+          </p>
+          <div class="grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
+            <div class="bg-tophDark text-white p-3 rounded-xl flex flex-col justify-center shadow">
+              <i class="fa-solid fa-user text-tophGold mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px] font-semibold">1. Usuario</span>
+            </div>
+            <div class="bg-tophDark text-white p-3 rounded-xl flex flex-col justify-center shadow">
+              <i class="fa-solid fa-location-crosshairs text-tophGold mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px] font-semibold">2. Destino</span>
+            </div>
+            <div class="bg-tophDark text-white p-3 rounded-xl flex flex-col justify-center shadow">
+              <i class="fa-solid fa-compass text-tophGold mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px] font-semibold">3. Ruta</span>
+            </div>
+            <div class="bg-tophDark text-white p-3 rounded-xl flex flex-col justify-center shadow">
+              <i class="fa-solid fa-volume-high text-tophGold mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px] font-semibold">4. Voz/Háptica</span>
+            </div>
+            <div class="bg-tophDark text-white p-3 rounded-xl flex flex-col justify-center shadow">
+              <i class="fa-solid fa-camera text-tophGold mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px] font-semibold">5. Obstáculo</span>
+            </div>
+            <div class="bg-tophGold text-tophDark p-3 rounded-xl flex flex-col justify-center shadow font-bold">
+              <i class="fa-solid fa-circle-check mb-1.5 text-sm" aria-hidden="true"></i>
+              <span class="text-[11px]">6. Llegada</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray border-t pt-2">
+          * La detección visual actúa como componente de apoyo integrado en la navegación general del campus.
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Funcionamiento General -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 4: Funcionamiento general de TOPH">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Operativa del Sistema</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Funcionamiento en 5 Etapas</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 my-auto">
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <span class="text-xl font-black text-tophGold">01</span>
+            <div>
+              <h4 class="font-bold text-tophDark text-xs mb-1">Selección de Destino</h4>
+              <p class="text-[11px] text-slate-600">El usuario solicita un punto de interés universitario.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <span class="text-xl font-black text-tophGold">02</span>
+            <div>
+              <h4 class="font-bold text-tophDark text-xs mb-1">Obtención de Ruta</h4>
+              <p class="text-[11px] text-slate-600">El sistema recupera el trayecto definido o guardado.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <span class="text-xl font-black text-tophGold">03</span>
+            <div>
+              <h4 class="font-bold text-tophDark text-xs mb-1">Orientación Voz</h4>
+              <p class="text-[11px] text-slate-600">Instrucciones habladas breves sobre la dirección.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <span class="text-xl font-black text-tophGold">04</span>
+            <div>
+              <h4 class="font-bold text-tophDark text-xs mb-1">Respuesta Háptica</h4>
+              <p class="text-[11px] text-slate-600">Patrones de vibración para giros y alertas.</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <span class="text-xl font-black text-tophGold">05</span>
+            <div>
+              <h4 class="font-bold text-tophDark text-xs mb-1">Análisis Visual</h4>
+              <p class="text-[11px] text-slate-600">La cámara detecta posibles obstáculos en tiempo real.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-100 p-3 rounded-lg text-xs text-slate-700">
+          <b>Nota técnica:</b> Las etapas 1 y 2 requieren desarrollo e implementación adicional sobre la arquitectura base de percepción.
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Arquitectura General (Interactive) -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 5: Arquitectura general del sistema">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Estructura Modular</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Explorador de Arquitectura del Sistema</h2>
+          <p class="text-xs text-tophGray mt-0.5">Haz clic en cada módulo para inspeccionar sus componentes técnicos.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-center">
+          <div class="space-y-2.5 lg:col-span-1" role="region" aria-label="Lista de módulos de arquitectura">
+            <button onclick="showModuleDetails('ui')" class="w-full text-left bg-tophDark text-white p-3.5 rounded-xl hover:bg-emerald-950 transition border-l-4 border-l-tophGold shadow" aria-label="Ver detalles de Interfaz y Comandos">
+              <h4 class="font-bold text-xs flex items-center justify-between"><span>Interfaz y Comandos</span> <i class="fa-solid fa-chevron-right text-[10px] text-tophGold" aria-hidden="true"></i></h4>
+              <p class="text-[11px] text-tophGray mt-0.5">Jetpack Compose, SpeechManager</p>
+            </button>
+            <button onclick="showModuleDetails('nav')" class="w-full text-left bg-tophDark text-white p-3.5 rounded-xl hover:bg-emerald-950 transition border-l-4 border-l-tophGold shadow" aria-label="Ver detalles de Navegación Universitaria">
+              <h4 class="font-bold text-xs flex items-center justify-between"><span>Navegación Universitaria</span> <i class="fa-solid fa-chevron-right text-[10px] text-tophGold" aria-hidden="true"></i></h4>
+              <p class="text-[11px] text-tophGray mt-0.5">Destinos, Rutas y Waypoints (Propuesto)</p>
+            </button>
+            <button onclick="showModuleDetails('db')" class="w-full text-left bg-tophDark text-white p-3.5 rounded-xl hover:bg-emerald-950 transition border-l-4 border-l-tophGold shadow" aria-label="Ver detalles de Persistencia Local">
+              <h4 class="font-bold text-xs flex items-center justify-between"><span>Persistencia Local</span> <i class="fa-solid fa-chevron-right text-[10px] text-tophGold" aria-hidden="true"></i></h4>
+              <p class="text-[11px] text-tophGray mt-0.5">Room / SQLite Database</p>
+            </button>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-2xl border-2 border-dashed border-slate-300 lg:col-span-2 flex flex-col justify-center min-h-[140px]" id="moduleDetailBox" aria-live="polite">
+            <div class="text-center text-slate-400">
+              <i class="fa-solid fa-hand-pointer text-2xl mb-2 text-tophGold" aria-hidden="true"></i>
+              <p class="text-xs font-medium">Selecciona un módulo a la izquierda para ver su detalle técnico.</p>
+            </div>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray">
+          Diferenciación clara entre módulos de navegación universitaria (propuestos) y módulos de percepción (implementados).
+        </div>
+      </div>
+
+      <!-- SLIDE 6: Navegación y Rutas dentro del Campus -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 6: Navegación y rutas dentro del campus">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Orientación Espacial</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Navegación y Rutas del Campus</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-auto items-center">
+          <div class="space-y-2.5">
+            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-l-tophDark text-xs text-slate-700 shadow-sm">
+              <i class="fa-solid fa-location-dot text-tophGold mr-2" aria-hidden="true"></i> Registro de puntos de interés del campus.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-l-tophDark text-xs text-slate-700 shadow-sm">
+              <i class="fa-solid fa-compass text-tophGold mr-2" aria-hidden="true"></i> Selección de destino mediante comandos de voz.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-l-tophDark text-xs text-slate-700 shadow-sm">
+              <i class="fa-solid fa-turn-right text-tophGold mr-2" aria-hidden="true"></i> Definición de secuencias de giro y continuación.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-l-tophDark text-xs text-slate-700 shadow-sm">
+              <i class="fa-solid fa-database text-tophGold mr-2" aria-hidden="true"></i> Almacenamiento local de recorridos frecuentes.
+            </div>
+          </div>
+          <div class="bg-tophDark text-white p-5 rounded-2xl text-center shadow-lg flex flex-col justify-center items-center">
+            <i class="fa-solid fa-map-location-dot text-3xl text-tophGold mb-2" aria-hidden="true"></i>
+            <h4 class="font-bold text-sm mb-1">Mapa Conceptual Universitario</h4>
+            <p class="text-[11px] text-tophGray mt-1">Entrada Principal ➔ Facultad ➔ Biblioteca ➔ Cafetería</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-xs text-amber-900">
+          <b>Precisión técnica:</b> Room / SQLite almacena datos estáticos; el posicionamiento automático y cálculo dinámico de rutas requieren desarrollo adicional.
+        </div>
+      </div>
+
+      <!-- SLIDE 7: Guiado por Voz (Interactive TTS Simulator) -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 7: Guiado por voz">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Interfaz Auditiva</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Simulador de Guiado por Voz Sintética</h2>
+          <p class="text-xs text-tophGray mt-0.5">Haz clic en los botones para escuchar mensajes de voz individuales (TtsManager).</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+          <button onclick="playVoicePrompt('Dirígete hacia la facultad')" class="cursor-pointer text-left bg-slate-50 hover:bg-emerald-950 hover:text-white transition p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between group" aria-label="Reproducir instrucción: Dirígete hacia la facultad">
+            <div>
+              <span class="text-[11px] text-tophGold font-bold uppercase">Instrucción Inicial</span>
+              <p class="font-display font-semibold text-xs lg:text-sm mt-1.5 group-hover:text-white text-tophDark">«Dirígete hacia la facultad»</p>
+            </div>
+            <div class="mt-3 flex items-center text-[11px] text-tophGray group-hover:text-tophGold">
+              <i class="fa-solid fa-volume-high mr-1.5" aria-hidden="true"></i> Reproducir audio sintético
+            </div>
+          </button>
+          <button onclick="playVoicePrompt('Gira a la derecha en el pasillo')" class="cursor-pointer text-left bg-slate-50 hover:bg-emerald-950 hover:text-white transition p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between group" aria-label="Reproducir instrucción: Gira a la derecha">
+            <div>
+              <span class="text-[11px] text-tophGold font-bold uppercase">Orientación de Giro</span>
+              <p class="font-display font-semibold text-xs lg:text-sm mt-1.5 group-hover:text-white text-tophDark">«Gira a la derecha»</p>
+            </div>
+            <div class="mt-3 flex items-center text-[11px] text-tophGray group-hover:text-tophGold">
+              <i class="fa-solid fa-volume-high mr-1.5" aria-hidden="true"></i> Reproducir audio sintético
+            </div>
+          </button>
+          <button onclick="playVoicePrompt('Atención: posible obstáculo al frente')" class="cursor-pointer text-left bg-slate-50 hover:bg-emerald-950 hover:text-white transition p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between group" aria-label="Reproducir alerta: Atención posible obstáculo">
+            <div>
+              <span class="text-[11px] text-amber-600 font-bold uppercase">Alerta de Seguridad</span>
+              <p class="font-display font-semibold text-xs lg:text-sm mt-1.5 group-hover:text-white text-tophDark">«Atención: posible obstáculo al frente»</p>
+            </div>
+            <div class="mt-3 flex items-center text-[11px] text-tophGray group-hover:text-tophGold">
+              <i class="fa-solid fa-volume-high mr-1.5" aria-hidden="true"></i> Reproducir audio sintético
+            </div>
+          </button>
+        </div>
+        <div id="voiceStatus" class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg text-xs text-emerald-900 text-center font-medium" aria-live="polite">
+          Sistema de síntesis de voz listo. Haz clic en una tarjeta para probar.
+        </div>
+      </div>
+
+      <!-- SLIDE 8: Respuesta Háptica Direccional (Interactive Simulator) -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 8: Respuesta háptica direccional">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Retroalimentación Táctil</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Simulador de Respuesta Háptica Direccional</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 my-auto items-center">
+          <div class="space-y-2.5">
+            <button onclick="triggerHaptic('left')" class="w-full text-left bg-slate-50 hover:bg-slate-100 p-3 rounded-xl border border-slate-200 shadow-sm transition flex items-center justify-between group" aria-label="Probar vibración izquierda">
+              <div>
+                <h4 class="font-bold text-tophDark text-xs">Izquierda (Dos pulsos cortos)</h4>
+                <p class="text-[11px] text-tophGray">Patrón de vibración direccional izquierdo</p>
+              </div>
+              <span class="bg-tophDark text-tophGold px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-tophGold group-hover:text-tophDark transition">Probar</span>
+            </button>
+            <button onclick="triggerHaptic('right')" class="w-full text-left bg-slate-50 hover:bg-slate-100 p-3 rounded-xl border border-slate-200 shadow-sm transition flex items-center justify-between group" aria-label="Probar vibración derecha">
+              <div>
+                <h4 class="font-bold text-tophDark text-xs">Derecha (Un pulso continuo simple)</h4>
+                <p class="text-[11px] text-tophGray">Patrón de vibración direccional derecho</p>
+              </div>
+              <span class="bg-tophDark text-tophGold px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-tophGold group-hover:text-tophDark transition">Probar</span>
+            </button>
+            <button onclick="triggerHaptic('center')" class="w-full text-left bg-slate-50 hover:bg-slate-100 p-3 rounded-xl border border-slate-200 shadow-sm transition flex items-center justify-between group" aria-label="Probar vibración de alerta frontal">
+              <div>
+                <h4 class="font-bold text-tophDark text-xs">Atención Frontal (Tres pulsos rápidos)</h4>
+                <p class="text-[11px] text-tophGray">Alerta de proximidad de obstáculo frontal</p>
+              </div>
+              <span class="bg-tophDark text-tophGold px-2.5 py-1 rounded-lg text-xs font-bold group-hover:bg-tophGold group-hover:text-tophDark transition">Probar</span>
+            </button>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-900 text-white p-5 rounded-2xl shadow-inner relative overflow-hidden">
+            <div id="phoneMockup" class="w-24 h-40 bg-tophDark border-4 border-tophGold rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative transition-all" aria-hidden="true">
+              <i class="fa-solid fa-mobile-screen text-2xl text-tophGold mb-1.5"></i>
+              <span id="hapticText" class="text-[10px] text-center font-bold text-slate-300">Modo Reposo</span>
+            </div>
+            <p id="hapticDesc" class="text-[11px] text-tophGray mt-2 text-center" aria-live="polite">Selecciona un patrón háptico para activar la simulación.</p>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray">
+          * Patrones evaluados con la API VibrationEffect de Android.
+        </div>
+      </div>
+
+      <!-- SLIDE 9: Visión Artificial y Detección de Obstáculos -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 9: Visión artificial y detección de obstáculos">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Percepción del Entorno</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Visión Artificial y Detección de Obstáculos</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-auto items-center">
+          <div class="space-y-2.5">
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">
+              <b>Captura continua:</b> CameraX a resolución de 640 × 480 píxeles.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">
+              <b>Frecuencia objetivo:</b> 15 – 20 FPS para procesamiento local eficiente.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">
+              <b>Clasificación espacial:</b> Izquierda, centro y derecha.
+            </div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">
+              <b>Niveles de riesgo previstos:</b> Alto, medio y bajo ante obstáculos.
+            </div>
+          </div>
+          <div class="bg-slate-100 border-2 border-dashed border-tophDark p-6 rounded-2xl text-center flex flex-col justify-center items-center">
+            <i class="fa-solid fa-camera-rotate text-3xl text-tophDark mb-2" aria-hidden="true"></i>
+            <h4 class="font-bold text-sm text-tophDark mb-1">Módulo ObstacleDetector</h4>
+            <p class="text-[11px] text-slate-600 mt-0.5">Análisis local de imágenes para identificar elementos en pasillos y zonas de circulación.</p>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray">
+          La detección visual complementa la navegación, pero no determina por sí sola la ubicación del usuario.
+        </div>
+      </div>
+
+      <!-- SLIDE 10: Integración entre voz, vibración y movimiento -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 10: Integración sensorial">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Sinergia Sensorial</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Integración de Voz, Vibración y Movimiento</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-auto">
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophDark shadow-sm">
+            <h4 class="font-bold text-tophDark text-xs mb-1.5">Canales de Alerta</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Audio sintético (380–750 Hz, 32% amplitud) y vibraciones direccionales coordinadas.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophGold shadow-sm">
+            <h4 class="font-bold text-tophDark text-xs mb-1.5">Detección de Inactividad</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">SensorManager y acelerómetro para silenciar tonos tras ~1.2 segundos sin movimiento.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-t-4 border-t-tophDark shadow-sm">
+            <h4 class="font-bold text-tophDark text-xs mb-1.5">Priorización de Alertas</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Alertas de alto riesgo interrumpen instrucciones de voz secundarias para mayor seguridad.</p>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray">
+          * El filtro estático es un mecanismo de apoyo y no un indicador infalible de marcha peatonal.
+        </div>
+      </div>
+
+      <!-- SLIDE 11: Interfaz y Accesibilidad -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 11: Interfaz y accesibilidad móvil">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Diseño Accesible</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Interfaz y Accesibilidad Móvil</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-auto items-center">
+          <div class="space-y-2.5">
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">Botones grandes y de alto contraste.</div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">Confirmación mediante teclas físicas de volumen.</div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">Compatibilidad prevista con TalkBack.</div>
+            <div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-700 border border-slate-200">Mensajes breves y jerarquía clara de información.</div>
+          </div>
+          <div class="bg-tophDark text-white p-6 rounded-2xl text-center shadow-lg flex flex-col justify-center items-center">
+            <span class="bg-tophGold text-tophDark font-bold text-xs px-3 py-1 rounded mb-2">Identidad Visual TOPH</span>
+            <h4 class="font-bold text-sm mb-1 text-white">Verde Petróleo (#081815) & Oro Viejo (#D4AF37)</h4>
+            <p class="text-[11px] text-tophGray">Texto claro sobre fondo oscuro para máxima legibilidad.</p>
+          </div>
+        </div>
+        <div class="text-xs text-tophGray">
+          Pantallas principales y de navegación estructuradas como prototipos conceptuales.
+        </div>
+      </div>
+
+      <!-- SLIDE 12: Base de Datos y Gestión de Destinos -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 12: Base de datos y gestión de destinos">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Persistencia de Datos</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-bold text-tophDark mt-2">Base de Datos y Entidades Room / SQLite</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-auto">
+          <div class="bg-slate-50 p-5 rounded-xl border-l-4 border-l-tophDark shadow-sm">
+            <h4 class="font-bold text-tophDark text-sm mb-1">RouteEntity</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Almacena información general y metadatos de cada ruta universitaria guardada.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-l-4 border-l-tophGold shadow-sm">
+            <h4 class="font-bold text-tophDark text-sm mb-1">WaypointEntity</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Registra puntos de referencia intermedios y secuencias de recorrido.</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-xl border-l-4 border-l-tophDark shadow-sm">
+            <h4 class="font-bold text-tophDark text-sm mb-1">DestinationEntity</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">Propuesta de ampliación para administrar el directorio de destinos del campus.</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg text-xs text-amber-900">
+          <b>Diferenciación:</b> El almacenamiento local en SQLite no administra por sí solo un directorio universitario completo sin servicios de indexación adicionales.
+        </div>
+      </div>
+
+      <!-- SLIDE 13: Matriz de Criterios WCAG 2.2 AA & Accesibilidad Digital -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-6 lg:p-8 bg-white overflow-y-auto" role="region" aria-label="Diapositiva 13: Matriz de Criterios WCAG 2.2 AA">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Estándares Internacionales</span>
+          <h2 class="font-display text-xl lg:text-2xl font-bold text-tophDark mt-1">Matriz de Criterios WCAG 2.2 AA & Accesibilidad</h2>
+        </div>
+        <div class="my-auto overflow-x-auto">
+          <table class="w-full text-left text-[11px] lg:text-xs border-collapse" aria-label="Matriz WCAG 2.2 AA de TOPH">
+            <thead>
+              <tr class="bg-tophDark text-white">
+                <th class="p-2.5 rounded-l-lg">Criterio / Éxito</th>
+                <th class="p-2.5">Descripción WCAG 2.2 AA</th>
+                <th class="p-2.5">Implementación Técnica en TOPH</th>
+                <th class="p-2.5 rounded-r-lg">Ratio / Foco / ARIA</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr class="bg-slate-50">
+                <td class="p-2.5 font-semibold text-tophDark">1.4.3 Contraste Mínimo</td>
+                <td class="p-2.5">Texto con contraste suficiente frente al fondo.</td>
+                <td class="p-2.5">Uso estricto de Verde Petróleo (#081815) y Oro Viejo (#D4AF37) sobre blanco.</td>
+                <td class="p-2.5 font-mono text-emerald-800">Ratio &gt; 7.5:1 (Supera AA/AAA)</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-tophDark">2.4.7 Foco Visible</td>
+                <td class="p-2.5">Todo elemento interactivo muestra un indicador de foco claro.</td>
+                <td class="p-2.5">Indicador de foco explícito mediante CSS <code class="bg-slate-200 px-1 rounded">outline: 3px solid #D4AF37</code>.</td>
+                <td class="p-2.5 font-mono text-emerald-800">Outline de 3px con contraste de borde</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-2.5 font-semibold text-tophDark">4.1.2 Nombre, Rol, Valor</td>
+                <td class="p-2.5">Elementos de UI con roles y estados accesibles para lectores de pantalla.</td>
+                <td class="p-2.5">Integración de atributos semánticos ARIA en vistas y componentes interactivos.</td>
+                <td class="p-2.5 font-mono text-emerald-800">aria-live="polite", role="region"</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-tophDark">1.4.11 Contraste No-Texto</td>
+                <td class="p-2.5">Contraste en componentes de interfaz y bordes gráficos de al menos 3:1.</td>
+                <td class="p-2.5">Bordes de tarjetas y botones con contraste reforzado en oro viejo y verde oscuro.</td>
+                <td class="p-2.5 font-mono text-emerald-800">Ratio &gt; 4.5:1 en elementos gráficos</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-2.5 font-semibold text-tophDark">2.5.3 Etiqueta en el Nombre</td>
+                <td class="p-2.5">El texto visible coincide con el nombre accesible para tecnologías asistitivas.</td>
+                <td class="p-2.5">Uso riguroso de <code class="bg-slate-200 px-1 rounded">aria-label</code> coincidente con el texto de botones.</td>
+                <td class="p-2.5 font-mono text-emerald-800">Coincidencia 100% texto-etiqueta</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-[11px] text-tophGray">
+          * Matriz integrada para garantizar compatibilidad con lectores de pantalla (TalkBack / Web Speech API) y navegación por teclado.
+        </div>
+      </div>
+
+      <!-- SLIDE 14: Ficha Técnica -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-white" role="region" aria-label="Diapositiva 14: Ficha técnica del proyecto">
+        <div>
+          <span class="text-tophDark font-bold text-xs uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">Especificaciones</span>
+          <h2 class="font-display text-2xl font-bold text-tophDark mt-1">Ficha Técnica del Proyecto</h2>
+        </div>
+        <div class="my-auto overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse" aria-label="Ficha técnica">
+            <thead>
+              <tr class="bg-tophDark text-white">
+                <th class="p-2 rounded-l-lg">Componente</th>
+                <th class="p-2 rounded-r-lg">Tecnología / Especificación</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr class="bg-slate-50">
+                <td class="p-2 font-semibold">Aplicación Móvil</td>
+                <td class="p-2">Android nativo (Kotlin / Java)</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-semibold">Interfaz de Usuario</td>
+                <td class="p-2">Jetpack Compose (WCAG 2.2 AA)</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-2 font-semibold">Captura Visual</td>
+                <td class="p-2">CameraX (640 × 480 px, 15–20 FPS)</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-semibold">Guiado y Voz</td>
+                <td class="p-2">TtsManager / SpeechManager</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-2 font-semibold">Base de Datos</td>
+                <td class="p-2">Room / SQLite</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-semibold">Dispositivo Objetivo</td>
+                <td class="p-2">Xiaomi Redmi Note 11 (Snapdragon 680)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-xs text-tophGray">
+          * Nota: API 26+ corresponde a Android 8.0 y versiones superiores.
+        </div>
+      </div>
+
+      <!-- SLIDE 15: Beneficios, Limitaciones, Validación y Conclusiones -->
+      <div class="slide-pane flex-1 flex flex-col justify-between p-8 lg:p-10 bg-gradient-to-br from-[#081815] to-[#0f2822] text-white" role="region" aria-label="Diapositiva 15: Conclusiones y cierre">
+        <div class="flex items-center space-x-3">
+          <span class="bg-tophGold text-tophDark font-bold text-xs px-3 py-1 rounded uppercase tracking-wider">Sinergia Digital</span>
+          <span class="text-tophGray text-xs font-medium">Cierre de Investigación</span>
+        </div>
+        <div class="my-auto space-y-4 max-w-3xl">
+          <h2 class="font-display text-2xl lg:text-3xl font-extrabold text-white mb-2">Beneficios, Validación y Conclusiones</h2>
+          <div class="space-y-2 text-slate-200 text-xs lg:text-sm">
+            <p>• <strong class="text-tophGold">Beneficios:</strong> Orientación universitaria autónoma y reducción de la dependencia visual mediante canales hápticos y auditivos coordinados.</p>
+            <p>• <strong class="text-tophGold">Validación en Campus:</strong> Pruebas de usabilidad controladas y cumplimiento riguroso de WCAG 2.2 AA para interfaces accesibles.</p>
+            <p>• <strong class="text-tophGold">Proyección:</strong> Sinergia Digital continúa expandiendo el ecosistema móvil y web de TOPH para la inclusión universitaria integral.</p>
+          </div>
+        </div>
+        <div class="border-t border-white/15 pt-3 flex flex-col sm:flex-row items-center justify-between text-xs text-tophGray">
+          <span>«TOPH: una forma más accesible de orientarse y desplazarse en el campus»</span>
+          <span class="text-tophGold font-bold">¡Muchas gracias por su atención!</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER NAVIGATION CONTROLS -->
+  <footer class="bg-tophDark border-t border-emerald-900/60 px-4 lg:px-6 py-3 flex items-center justify-between z-30 shadow-md" role="contentinfo">
+    <button id="prevBtn" class="bg-emerald-950 hover:bg-emerald-900 text-white border border-emerald-800 px-4 py-2 rounded-xl font-semibold text-xs transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Diapositiva anterior">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> <span>Anterior</span>
+    </button>
+    <div class="text-xs text-tophGray hidden md:block">
+      Atajos: <kbd class="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 text-tophGold">←</kbd> <kbd class="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 text-tophGold">→</kbd> Navegar | <kbd class="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 text-tophGold">S</kbd> Leer | <kbd class="bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 text-tophGold">C</kbd> Contraste
+    </div>
+    <button id="nextBtn" class="bg-tophGold hover:bg-amber-400 text-tophDark font-bold px-5 py-2 rounded-xl text-xs transition flex items-center space-x-2 shadow-lg disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Siguiente diapositiva">
+      <span>Siguiente</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+    </button>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const totalSlides = 15;
+    const slides = document.querySelectorAll('.slide-pane');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideList = document.getElementById('slideList');
+    const slideContainer = document.getElementById('slideContainer');
+
+    // Speech & Screen Reader State
+    let speechRate = 1.0;
+    let isReading = false;
+    let currentUtterance = null;
+
+    const architectureData = {
+      ui: {
+        title: "Interfaz y Comandos (UI)",
+        tech: "Jetpack Compose, SpeechManager, TtsManager",
+        desc: "Módulo encargado de renderizar pantallas accesibles adaptadas a TalkBack, procesar comandos de voz del usuario y gestionar la síntesis de voz interactiva con respuestas auditivas fluidas y de baja latencia."
+      },
+      nav: {
+        title: "Navegación Universitaria (Propuesto)",
+        tech: "Gestor de Rutas, Waypoints y Destinos del Campus",
+        desc: "Componente propuesto para administrar el directorio de facultades, bibliotecas, cafeterías y servicios, calculando secuencias de giros y puntos de referencia intermedios sin depender de cartografía exterior."
+      },
+      db: {
+        title: "Persistencia Local",
+        tech: "Room Persistence Library / SQLite",
+        desc: "Almacenamiento estructurado local mediante SQLite y Room DAO para registrar rutas frecuentes, metadatos de waypoints y preferencias de configuración del usuario sin requerir conexión a internet permanente."
+      }
+    };
+
+    function showModuleDetails(key) {
+      const box = document.getElementById('moduleDetailBox');
+      const data = architectureData[key] || {
+        title: "Módulo del Sistema",
+        tech: "CameraX / ObstacleDetector / SensorManager",
+        desc: "Componente operativo de percepción, captura continua de video, análisis de profundidad horizontal/vertical y respuesta háptica o de movimiento."
+      };
+      
+      box.innerHTML = `
+        <div>
+          <span class="text-[11px] font-bold text-tophGold uppercase">${data.tech}</span>
+          <h4 class="font-display font-bold text-tophDark text-sm mt-0.5 mb-1">${data.title}</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">${data.desc}</p>
+        </div>
+      `;
+    }
+
+    // Individual Voice Prompt Player
+    function playVoicePrompt(text) {
+      const statusBox = document.getElementById('voiceStatus');
+      statusBox.innerHTML = `<i class="fa-solid fa-volume-high text-tophGold mr-2" aria-hidden="true"></i> Reproduciendo audio sintético: <b>«${text}»</b>`;
+      
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        utterance.rate = speechRate;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // FULL SCREEN READER FOR CURRENT SLIDE
+    function toggleScreenReader() {
+      if (!('speechSynthesis' in window)) {
+        alert('Tu navegador no soporta síntesis de voz.');
+        return;
+      }
+
+      if (isReading) {
+        stopScreenReader();
+        return;
+      }
+
+      const activePane = slides[currentSlide];
+      const textToRead = activePane.innerText || "Diapositiva actual";
+      
+      window.speechSynthesis.cancel();
+      currentUtterance = new SpeechSynthesisUtterance(textToRead);
+      currentUtterance.lang = 'es-ES';
+      currentUtterance.rate = speechRate;
+
+      const readerIcon = document.getElementById('readerIcon');
+      const readerText = document.getElementById('readerText');
+
+      currentUtterance.onstart = () => {
+        isReading = true;
+        readerIcon.className = "fa-solid fa-volume-high text-tophGold";
+        readerText.innerText = "Leyendo...";
+      };
+
+      currentUtterance.onend = () => {
+        isReading = false;
+        readerIcon.className = "fa-solid fa-play";
+        readerText.innerText = "Leer";
+      };
+
+      currentUtterance.onerror = () => {
+        isReading = false;
+        readerIcon.className = "fa-solid fa-play";
+        readerText.innerText = "Leer";
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+    }
+
+    function pauseScreenReader() {
+      if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.speaking) {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          } else {
+            window.speechSynthesis.pause();
+          }
+        }
+      }
+    }
+
+    function stopScreenReader() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        isReading = false;
+        const readerIcon = document.getElementById('readerIcon');
+        const readerText = document.getElementById('readerText');
+        if (readerIcon && readerText) {
+          readerIcon.className = "fa-solid fa-play";
+          readerText.innerText = "Leer";
+        }
+      }
+    }
+
+    function changeSpeechRate(rate) {
+      speechRate = parseFloat(rate);
+      if (window.speechSynthesis.speaking && isReading) {
+        toggleScreenReader();
+        toggleScreenReader();
+      }
+    }
+
+    // FONT SIZE SCALING
+    let fontScaleIndex = 1; // 0: sm, 1: base, 2: lg, 3: xl
+    const fontScaleClasses = ['font-scale-sm', 'font-scale-base', 'font-scale-lg', 'font-scale-xl'];
+
+    function adjustFontSize(direction) {
+      fontScaleIndex += direction;
+      if (fontScaleIndex < 0) fontScaleIndex = 0;
+      if (fontScaleIndex >= fontScaleClasses.length) fontScaleIndex = fontScaleClasses.length - 1;
+      applyFontScale();
+    }
+
+    function resetFontSize() {
+      fontScaleIndex = 1;
+      applyFontScale();
+    }
+
+    function applyFontScale() {
+      slideContainer.className = `w-full max-w-6xl h-full max-h-[640px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-emerald-900/25 relative ${fontScaleClasses[fontScaleIndex]}`;
+    }
+
+    // HAPTIC SIMULATOR
+    function triggerHaptic(type) {
+      const phone = document.getElementById('phoneMockup');
+      const hapticText = document.getElementById('hapticText');
+      const hapticDesc = document.getElementById('hapticDesc');
+
+      phone.className = "w-24 h-40 bg-tophDark border-4 border-tophGold rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative transition-all";
+      
+      if (type === 'left') {
+        phone.classList.add('vibrate-left');
+        hapticText.innerText = "IZQUIERDA";
+        hapticDesc.innerText = "Patrón activo: Dos pulsos cortos de vibración direccional.";
+      } else if (type === 'right') {
+        phone.classList.add('vibrate-right');
+        hapticText.innerText = "DERECHA";
+        hapticDesc.innerText = "Patrón activo: Un pulso continuo simple.";
+      } else if (type === 'center') {
+        phone.classList.add('vibrate-center');
+        hapticText.innerText = "ALERTA";
+        hapticDesc.innerText = "Patrón activo: Tres pulsos rápidos de atención frontal.";
+      }
+
+      if (navigator.vibrate) {
+        if (type === 'left') navigator.vibrate([80, 50, 80]);
+        else if (type === 'right') navigator.vibrate(250);
+        else if (type === 'center') navigator.vibrate([60, 60, 60, 60, 60]);
+      }
+
+      setTimeout(() => {
+        phone.className = "w-24 h-40 bg-tophDark border-4 border-tophGold rounded-2xl flex flex-col items-center justify-center p-2 shadow-2xl relative transition-all";
+        hapticText.innerText = "Modo Reposo";
+      }, 1500);
+    }
+
+    function buildSidebarIndex() {
+      slideList.innerHTML = '';
+      slides.forEach((slide, index) => {
+        const regionLabel = slide.getAttribute('aria-label') || `Diapositiva ${index + 1}`;
+        const item = document.createElement('button');
+        item.className = `w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between ${index === currentSlide ? 'bg-tophGold text-tophDark font-bold' : 'text-slate-300 hover:bg-emerald-900/40 hover:text-white'}`;
+        item.setAttribute('aria-label', `Ir a ${regionLabel}`);
+        item.innerHTML = `
+          <span>${regionLabel}</span>
+          <span class="text-[11px] opacity-75">#${index + 1}</span>
+        `;
+        item.onclick = () => {
+          goToSlide(index);
+          toggleSidebar();
+        };
+        slideList.appendChild(item);
+      });
+    }
+
+    function updateSlides() {
+      stopScreenReader();
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      slideIndicator.innerText = `${currentSlide + 1} / ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+      
+      buildSidebarIndex();
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSlides();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlides();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlides();
+      }
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    function toggleSidebar() {
+      sidebar.classList.toggle('-translate-x-full');
+    }
+
+    document.getElementById('sidebarToggle').onclick = toggleSidebar;
+    document.getElementById('sidebarClose').onclick = toggleSidebar;
+
+    nextBtn.onclick = nextSlide;
+    prevBtn.onclick = prevSlide;
+
+    // KEYBOARD NAVIGATION SHORTCUTS
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        toggleScreenReader();
+      } else if (e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        document.getElementById('contrastBtn').click();
+      } else if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        document.getElementById('fullscreenBtn').click();
+      } else if (e.altKey && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    });
+
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error("Error attempting fullscreen:", err.message);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    };
+
+    const contrastBtn = document.getElementById('contrastBtn');
+    let highContrastActive = false;
+    contrastBtn.onclick = () => {
+      highContrastActive = !highContrastActive;
+      document.body.classList.toggle('high-contrast', highContrastActive);
+      contrastBtn.classList.toggle('text-tophGold', highContrastActive);
+    };
+
+    window.onload = () => {
+      updateSlides();
+    };
+  </script>
+</body>
+</html>
